@@ -38,7 +38,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 @InputRequirement(InputRequirement.Requirement.INPUT_REQUIRED)
-@Tags({"etl", "sql"})
+@Tags({"etl", "sql", "link-move"})
 @CapabilityDescription("Loads FlowFile data to a DB table. Rows missing in DB are inserted, rows already in DB are updated.")
 @ReadsAttributes({@ReadsAttribute(attribute = "", description = "")})
 @WritesAttributes({@WritesAttribute(attribute = "", description = "")})
@@ -46,7 +46,7 @@ public class UpsertSQL extends AbstractProcessor {
 
     static final PropertyDescriptor CONNECTION_POOL_PROPERTY = new PropertyDescriptor.Builder()
             .name("connection-pool")
-            .displayName("Database Connection Pooling Service")
+            .displayName("Database connection pool service")
             .description("The Controller Service that is used to obtain connection to database")
             .required(true)
             .identifiesControllerService(DBCPService.class)
@@ -54,16 +54,15 @@ public class UpsertSQL extends AbstractProcessor {
 
     static final PropertyDescriptor TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
             .name("table-name")
-            .displayName("target table name")
+            .displayName("Target table name")
             .description("The name of the target table for to insert or update data")
             .required(true)
             .allowableValues(MatchStrategy.values())
-            .defaultValue(MatchStrategy.pk.name())
             .build();
 
     static final PropertyDescriptor MATCH_STRATEGY_PROPERTY = new PropertyDescriptor.Builder()
             .name("match-strategy")
-            .displayName("row match strategy")
+            .displayName("Row matching strategy")
             .description("How should we identify existing rows to be updated")
             .required(false)
             .allowableValues(MatchStrategy.values())
@@ -72,8 +71,9 @@ public class UpsertSQL extends AbstractProcessor {
 
     static final PropertyDescriptor KEY_COLUMNS_PROPERTY = new PropertyDescriptor.Builder()
             .name("key-columns")
-            .displayName("key columns")
-            .description("A comma-separated list of the column names in the target table to use for row matching")
+            .displayName("Key columns")
+            .description("A comma-separated list of the column names in the target table to use for row matching. " +
+                    "Ignored unless 'Row matching strategy' is 'key_columns'")
             .required(false)
             .build();
 
