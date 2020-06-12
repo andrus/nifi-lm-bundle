@@ -46,6 +46,12 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.nifi</groupId>
+                <artifactId>nifi-dbcp-service-nar</artifactId>
+                <type>nar</type>
+                <version>${nifi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.nifi</groupId>
                 <artifactId>nifi-utils</artifactId>
                 <version>${nifi.version}</version>
             </dependency>
