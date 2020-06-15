@@ -41,6 +41,11 @@
             <artifactId>nifi-dbcp-service-nar</artifactId>
             <type>nar</type>
         </dependency>
+        <dependency>
+            <groupId>org.apache.nifi</groupId>
+            <artifactId>nifi-record-serialization-services-nar</artifactId>
+            <type>nar</type>
+        </dependency>
     </dependencies>
 
 </project>

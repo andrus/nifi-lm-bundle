@@ -29,6 +29,7 @@ import org.apache.nifi.processor.ProcessContext;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.ProcessorInitializationContext;
 import org.apache.nifi.processor.Relationship;
+import org.apache.nifi.serialization.RecordReaderFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -50,6 +51,14 @@ public class UpsertSQL extends AbstractProcessor {
             .description("The Controller Service that is used to obtain connection to database")
             .required(true)
             .identifiesControllerService(DBCPService.class)
+            .build();
+
+    static final PropertyDescriptor SOURCE_RECORD_READER = new PropertyDescriptor.Builder()
+            .name("source-record-reader")
+            .displayName("Source Record Reader")
+            .description("Specifies the Controller Service to use for reading incoming data")
+            .identifiesControllerService(RecordReaderFactory.class)
+            .required(true)
             .build();
 
     static final PropertyDescriptor TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
@@ -89,6 +98,7 @@ public class UpsertSQL extends AbstractProcessor {
     protected void init(ProcessorInitializationContext context) {
         this.descriptors = Collections.unmodifiableList(asList(
                 CONNECTION_POOL_PROPERTY,
+                SOURCE_RECORD_READER,
                 TABLE_NAME_PROPERTY,
                 MATCH_STRATEGY_PROPERTY,
                 KEY_COLUMNS_PROPERTY));
