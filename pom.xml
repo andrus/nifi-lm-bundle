@@ -39,6 +39,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- This is a parent of our nar. -->
+            <dependency>
+                <groupId>org.apache.nifi</groupId>
+                <artifactId>nifi-standard-services-api-nar</artifactId>
+                <type>nar</type>
+                <version>${nifi.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.nifi</groupId>
                 <artifactId>nifi-dbcp-service-api</artifactId>
@@ -46,19 +53,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.nifi</groupId>
-                <artifactId>nifi-dbcp-service-nar</artifactId>
-                <type>nar</type>
-                <version>${nifi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.nifi</groupId>
                 <artifactId>nifi-record-serialization-service-api</artifactId>
-                <version>${nifi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.nifi</groupId>
-                <artifactId>nifi-record-serialization-services-nar</artifactId>
-                <type>nar</type>
                 <version>${nifi.version}</version>
             </dependency>
             <dependency>
