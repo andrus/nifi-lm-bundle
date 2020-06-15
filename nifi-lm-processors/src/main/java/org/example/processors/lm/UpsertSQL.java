@@ -45,20 +45,20 @@ import static java.util.Arrays.asList;
 @WritesAttributes({@WritesAttribute(attribute = "", description = "")})
 public class UpsertSQL extends AbstractProcessor {
 
-    static final PropertyDescriptor CONNECTION_POOL_PROPERTY = new PropertyDescriptor.Builder()
-            .name("connection-pool")
-            .displayName("Database connection pool service")
-            .description("The Controller Service that is used to obtain connection to database")
-            .required(true)
-            .identifiesControllerService(DBCPService.class)
-            .build();
-
     static final PropertyDescriptor SOURCE_RECORD_READER = new PropertyDescriptor.Builder()
             .name("source-record-reader")
             .displayName("Source Record Reader")
             .description("Specifies the Controller Service to use for reading incoming data")
             .identifiesControllerService(RecordReaderFactory.class)
             .required(true)
+            .build();
+
+    static final PropertyDescriptor TARGET_CONNECTION_POOL_PROPERTY = new PropertyDescriptor.Builder()
+            .name("target-connection-pool")
+            .displayName("Target Database connection pool service")
+            .description("The Controller Service that is used to obtain connection to the target database")
+            .required(true)
+            .identifiesControllerService(DBCPService.class)
             .build();
 
     static final PropertyDescriptor TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
@@ -97,8 +97,8 @@ public class UpsertSQL extends AbstractProcessor {
     @Override
     protected void init(ProcessorInitializationContext context) {
         this.descriptors = Collections.unmodifiableList(asList(
-                CONNECTION_POOL_PROPERTY,
                 SOURCE_RECORD_READER,
+                TARGET_CONNECTION_POOL_PROPERTY,
                 TABLE_NAME_PROPERTY,
                 MATCH_STRATEGY_PROPERTY,
                 KEY_COLUMNS_PROPERTY));
