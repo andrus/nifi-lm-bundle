@@ -11,3 +11,4 @@ table data. It is idempotent and will generate a bare minimum of data modificati
 _TODO: On success create a new flow file that tags the data from the original flow file with ETL outcome labels:
 "inserted", "updated", "skipped". We already have this data available in the current processor._
 
+![Upsert Sample Flow](upsert-sample-flow/sample-flow.png)
