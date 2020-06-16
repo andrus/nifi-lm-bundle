@@ -19,7 +19,6 @@ package org.example.processors.lm;
 import org.apache.nifi.annotation.behavior.*;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.dbcp.DBCPService;
-import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.annotation.lifecycle.OnScheduled;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
@@ -30,6 +29,7 @@ import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.ProcessorInitializationContext;
 import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.serialization.RecordReaderFactory;
+import org.apache.nifi.serialization.RecordReader;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -47,7 +47,7 @@ public class UpsertSQL extends AbstractProcessor {
 
     static final PropertyDescriptor SOURCE_RECORD_READER = new PropertyDescriptor.Builder()
             .name("source-record-reader")
-            .displayName("Source Record Reader")
+            .displayName("Source record reader")
             .description("Specifies the Controller Service to use for reading incoming data")
             .identifiesControllerService(RecordReaderFactory.class)
             .required(true)
@@ -55,7 +55,7 @@ public class UpsertSQL extends AbstractProcessor {
 
     static final PropertyDescriptor TARGET_CONNECTION_POOL_PROPERTY = new PropertyDescriptor.Builder()
             .name("target-connection-pool")
-            .displayName("Target Database connection pool service")
+            .displayName("Target DB connection pool")
             .description("The Controller Service that is used to obtain connection to the target database")
             .required(true)
             .identifiesControllerService(DBCPService.class)
@@ -124,6 +124,8 @@ public class UpsertSQL extends AbstractProcessor {
 
     @Override
     public void onTrigger(ProcessContext context, ProcessSession session) throws ProcessException {
-        // TODO implement
+        RecordReaderFactory srcReaderFactory = context.getProperty(SOURCE_RECORD_READER).asControllerService(RecordReaderFactory.class);
+
+         RecordReader reader = srcReaderFactory.createRecordReader();
     }
 }

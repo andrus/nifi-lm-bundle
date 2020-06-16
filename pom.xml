@@ -37,6 +37,19 @@
         <module>nifi-lm-nar</module>
     </modules>
 
+    <repositories>
+        <repository>
+            <id>os-snapshots</id>
+            <url>https://maven.objectstyle.org/nexus/content/repositories/linkrest-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <!-- This is a parent of our nar. -->
@@ -58,13 +71,20 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.nifi</groupId>
-                <artifactId>nifi-utils</artifactId>
+                <artifactId>nifi-record</artifactId>
                 <version>${nifi.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.nifi</groupId>
-                <artifactId>nifi-mock</artifactId>
+                <artifactId>nifi-utils</artifactId>
                 <version>${nifi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nhl.dflib</groupId>
+                <artifactId>dflib-bom</artifactId>
+                <version>0.8-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
