@@ -16,25 +16,31 @@
  */
 package org.example.processors.lm;
 
+import com.nhl.dflib.DataFrame;
+import com.nhl.dflib.Printers;
+import com.nhl.dflib.jdbc.Jdbc;
 import org.apache.nifi.annotation.behavior.*;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.dbcp.DBCPService;
-import org.apache.nifi.annotation.lifecycle.OnScheduled;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
+import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.AbstractProcessor;
 import org.apache.nifi.processor.ProcessContext;
 import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.ProcessorInitializationContext;
 import org.apache.nifi.processor.Relationship;
+import org.apache.nifi.processor.util.StandardValidators;
+import org.apache.nifi.serialization.MalformedRecordException;
 import org.apache.nifi.serialization.RecordReaderFactory;
 import org.apache.nifi.serialization.RecordReader;
+import org.apache.nifi.serialization.record.Record;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -61,12 +67,12 @@ public class UpsertSQL extends AbstractProcessor {
             .identifiesControllerService(DBCPService.class)
             .build();
 
-    static final PropertyDescriptor TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
-            .name("table-name")
+    static final PropertyDescriptor TABLE_TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
+            .name("target-table-name")
             .displayName("Target table name")
             .description("The name of the target table for to insert or update data")
             .required(true)
-            .allowableValues(MatchStrategy.values())
+            .addValidator(StandardValidators.NON_BLANK_VALIDATOR)
             .build();
 
     static final PropertyDescriptor MATCH_STRATEGY_PROPERTY = new PropertyDescriptor.Builder()
@@ -91,6 +97,12 @@ public class UpsertSQL extends AbstractProcessor {
             .description("TODO: a FlowFile with update stats")
             .build();
 
+    static final Relationship FAILURE_RELATIONSHIP = new Relationship.Builder()
+            .name("failure")
+            .description("If a FlowFile fails processing for any reason, the original FlowFile will "
+                    + "be routed to this relationship")
+            .build();
+
     private List<PropertyDescriptor> descriptors;
     private Set<Relationship> relationships;
 
@@ -99,12 +111,13 @@ public class UpsertSQL extends AbstractProcessor {
         this.descriptors = Collections.unmodifiableList(asList(
                 SOURCE_RECORD_READER,
                 TARGET_CONNECTION_POOL_PROPERTY,
-                TABLE_NAME_PROPERTY,
+                TABLE_TABLE_NAME_PROPERTY,
                 MATCH_STRATEGY_PROPERTY,
                 KEY_COLUMNS_PROPERTY));
 
         this.relationships = Collections.unmodifiableSet(new HashSet<>(asList(
-                SUCCESS_RELATIONSHIP)));
+                SUCCESS_RELATIONSHIP,
+                FAILURE_RELATIONSHIP)));
     }
 
     @Override
@@ -117,15 +130,35 @@ public class UpsertSQL extends AbstractProcessor {
         return descriptors;
     }
 
-    @OnScheduled
-    public void onScheduled(ProcessContext context) {
-
-    }
-
     @Override
     public void onTrigger(ProcessContext context, ProcessSession session) throws ProcessException {
-        RecordReaderFactory srcReaderFactory = context.getProperty(SOURCE_RECORD_READER).asControllerService(RecordReaderFactory.class);
 
-         RecordReader reader = srcReaderFactory.createRecordReader();
+        FlowFile originalFF = session.get();
+        if (originalFF == null) {
+            return;
+        }
+
+        RecordReaderFactory srcReaderFactory = context
+                .getProperty(SOURCE_RECORD_READER)
+                .asControllerService(RecordReaderFactory.class);
+
+        UpsertBuilder upserter = UpsertBuilder
+                .create(getLogger())
+                .db(context.getProperty(TARGET_CONNECTION_POOL_PROPERTY).asControllerService(DBCPService.class))
+                .matchStrategy(context.getProperty(MATCH_STRATEGY_PROPERTY).getValue())
+                .targetTable(context.getProperty(TABLE_TABLE_NAME_PROPERTY).getValue())
+                .keyColumns(context.getProperty(KEY_COLUMNS_PROPERTY).getValue());
+
+        try (InputStream in = session.read(originalFF)) {
+            try (RecordReader reader = srcReaderFactory.createRecordReader(originalFF, in, getLogger())) {
+                upserter.upsert(reader);
+            }
+
+            session.transfer(originalFF, SUCCESS_RELATIONSHIP);
+
+        } catch (Exception e) {
+            getLogger().error("Failed to read records from {}; routing to failure", new Object[]{originalFF, e});
+            session.transfer(originalFF, FAILURE_RELATIONSHIP);
+        }
     }
 }
