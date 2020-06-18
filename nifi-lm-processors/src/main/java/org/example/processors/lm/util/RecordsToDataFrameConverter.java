@@ -1,4 +1,4 @@
-package org.example.processors.lm;
+package org.example.processors.lm.util;
 
 import com.nhl.dflib.*;
 import com.nhl.dflib.jdbc.connector.metadata.DbTableMetadata;
@@ -9,7 +9,6 @@ import org.apache.nifi.serialization.record.Record;
 import org.apache.nifi.serialization.record.RecordSchema;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class RecordsToDataFrameConverter {
 

@@ -1,4 +1,4 @@
-package org.example.processors.lm;
+package org.example.processors.lm.util;
 
 import com.nhl.dflib.DataFrame;
 import com.nhl.dflib.Printers;
@@ -13,6 +13,7 @@ import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.serialization.MalformedRecordException;
 import org.apache.nifi.serialization.RecordReader;
+import org.example.processors.lm.UpsertSQL;
 
 import java.io.IOException;
 import java.util.Objects;

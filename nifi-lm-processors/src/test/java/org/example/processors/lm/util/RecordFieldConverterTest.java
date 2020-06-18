@@ -1,4 +1,4 @@
-package org.example.processors.lm;
+package org.example.processors.lm.util;
 
 import org.apache.nifi.serialization.record.DataType;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package org.example.processors.lm;
+package org.example.processors.lm.util;
 
 import com.nhl.dflib.Index;
 import com.nhl.dflib.jdbc.connector.metadata.DbColumnMetadata;

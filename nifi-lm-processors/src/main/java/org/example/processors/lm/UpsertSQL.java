@@ -30,6 +30,8 @@ import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.serialization.RecordReader;
 import org.apache.nifi.serialization.RecordReaderFactory;
+import org.example.processors.lm.util.MatchStrategy;
+import org.example.processors.lm.util.UpsertBuilder;
 
 import java.io.InputStream;
 import java.util.*;
@@ -43,7 +45,7 @@ import static java.util.Arrays.asList;
 @WritesAttributes({@WritesAttribute(attribute = "", description = "")})
 public class UpsertSQL extends AbstractProcessor {
 
-    static final PropertyDescriptor SOURCE_RECORD_READER = new PropertyDescriptor.Builder()
+    public static final PropertyDescriptor SOURCE_RECORD_READER = new PropertyDescriptor.Builder()
             .name("source-record-reader")
             .displayName("Source record reader")
             .description("Specifies the Controller Service to use for reading incoming data")
@@ -51,7 +53,7 @@ public class UpsertSQL extends AbstractProcessor {
             .required(true)
             .build();
 
-    static final PropertyDescriptor TARGET_CONNECTION_POOL_PROPERTY = new PropertyDescriptor.Builder()
+    public static final PropertyDescriptor TARGET_CONNECTION_POOL_PROPERTY = new PropertyDescriptor.Builder()
             .name("target-connection-pool")
             .displayName("Target DB connection pool")
             .description("The Controller Service that is used to obtain connection to the target database")
@@ -59,7 +61,7 @@ public class UpsertSQL extends AbstractProcessor {
             .identifiesControllerService(DBCPService.class)
             .build();
 
-    static final PropertyDescriptor TABLE_TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
+    public static final PropertyDescriptor TABLE_TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
             .name("target-table-name")
             .displayName("Target table name")
             .description("The name of the target table for to insert or update data")
@@ -67,7 +69,7 @@ public class UpsertSQL extends AbstractProcessor {
             .addValidator(StandardValidators.NON_BLANK_VALIDATOR)
             .build();
 
-    static final PropertyDescriptor MATCH_STRATEGY_PROPERTY = new PropertyDescriptor.Builder()
+    public static final PropertyDescriptor MATCH_STRATEGY_PROPERTY = new PropertyDescriptor.Builder()
             .name("match-strategy")
             .displayName("Row matching strategy")
             .description("How should we identify existing rows to be updated")
@@ -77,7 +79,7 @@ public class UpsertSQL extends AbstractProcessor {
             .addValidator(UpsertSQL::customValidateMatchStrategy)
             .build();
 
-    static final PropertyDescriptor KEY_COLUMNS_PROPERTY = new PropertyDescriptor.Builder()
+    public static final PropertyDescriptor KEY_COLUMNS_PROPERTY = new PropertyDescriptor.Builder()
             .name("key-columns")
             .displayName("Key columns")
             .description("A comma-separated list of the column names in the target table to use for row matching. " +
@@ -86,12 +88,12 @@ public class UpsertSQL extends AbstractProcessor {
             .addValidator(StandardValidators.NON_BLANK_VALIDATOR)
             .build();
 
-    static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
+    public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
             .name("success")
             .description("TODO: a FlowFile with update stats")
             .build();
 
-    static final Relationship FAILURE_RELATIONSHIP = new Relationship.Builder()
+    public static final Relationship FAILURE_RELATIONSHIP = new Relationship.Builder()
             .name("failure")
             .description("If a FlowFile fails processing for any reason, the original FlowFile will "
                     + "be routed to this relationship")

@@ -17,6 +17,8 @@ import org.apache.nifi.reporting.InitializationException;
 import org.apache.nifi.serialization.RecordReaderFactory;
 import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
+import org.example.processors.lm.util.DBCPServiceDataSource;
+import org.example.processors.lm.util.MatchStrategy;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
