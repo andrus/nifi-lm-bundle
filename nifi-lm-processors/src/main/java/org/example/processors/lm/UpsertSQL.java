@@ -41,8 +41,6 @@ import static java.util.Arrays.asList;
 @InputRequirement(InputRequirement.Requirement.INPUT_REQUIRED)
 @Tags({"etl", "sql", "link-move"})
 @CapabilityDescription("Loads FlowFile data to a DB table. Rows missing in DB are inserted, rows already in DB are updated.")
-@ReadsAttributes({@ReadsAttribute(attribute = "", description = "")})
-@WritesAttributes({@WritesAttribute(attribute = "", description = "")})
 public class UpsertSQL extends AbstractProcessor {
 
     public static final PropertyDescriptor SOURCE_RECORD_READER = new PropertyDescriptor.Builder()
@@ -61,7 +59,7 @@ public class UpsertSQL extends AbstractProcessor {
             .identifiesControllerService(DBCPService.class)
             .build();
 
-    public static final PropertyDescriptor TABLE_TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
+    public static final PropertyDescriptor TARGET_TABLE_NAME_PROPERTY = new PropertyDescriptor.Builder()
             .name("target-table-name")
             .displayName("Target table name")
             .description("The name of the target table for to insert or update data")
@@ -102,7 +100,6 @@ public class UpsertSQL extends AbstractProcessor {
     private List<PropertyDescriptor> descriptors;
     private Set<Relationship> relationships;
 
-
     static ValidationResult customValidateMatchStrategy(String subject, String input, ValidationContext context) {
         if (MatchStrategy.key_columns.name().equals(input)) {
             String keyColumns = context.getProperties().get(KEY_COLUMNS_PROPERTY);
@@ -117,7 +114,7 @@ public class UpsertSQL extends AbstractProcessor {
         this.descriptors = Collections.unmodifiableList(asList(
                 SOURCE_RECORD_READER,
                 TARGET_CONNECTION_POOL_PROPERTY,
-                TABLE_TABLE_NAME_PROPERTY,
+                TARGET_TABLE_NAME_PROPERTY,
                 MATCH_STRATEGY_PROPERTY,
                 KEY_COLUMNS_PROPERTY));
 
@@ -152,7 +149,7 @@ public class UpsertSQL extends AbstractProcessor {
                 .create(getLogger())
                 .db(context.getProperty(TARGET_CONNECTION_POOL_PROPERTY).asControllerService(DBCPService.class))
                 .matchStrategy(context.getProperty(MATCH_STRATEGY_PROPERTY).getValue())
-                .targetTable(context.getProperty(TABLE_TABLE_NAME_PROPERTY).getValue())
+                .targetTable(context.getProperty(TARGET_TABLE_NAME_PROPERTY).getValue())
                 .keyColumns(context.getProperty(KEY_COLUMNS_PROPERTY).getValue());
 
         try (InputStream in = session.read(originalFF)) {

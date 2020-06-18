@@ -130,7 +130,7 @@ public class UpsertSQLIT {
         runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
         runner.assertNotValid();
 
-        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.setProperty(UpsertSQL.TARGET_TABLE_NAME_PROPERTY, "test_table");
         runner.assertValid();
     }
 
@@ -142,7 +142,7 @@ public class UpsertSQLIT {
 
         runner.setProperty(UpsertSQL.SOURCE_RECORD_READER, SOURCE_READER);
         runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
-        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.setProperty(UpsertSQL.TARGET_TABLE_NAME_PROPERTY, "test_table");
 
         runner.setProperty(UpsertSQL.MATCH_STRATEGY_PROPERTY, MatchStrategy.key_columns.name());
         runner.assertNotValid();
@@ -157,7 +157,7 @@ public class UpsertSQLIT {
         TestRunner runner = createRunnerWithControllers();
         runner.setProperty(UpsertSQL.SOURCE_RECORD_READER, SOURCE_READER);
         runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
-        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.setProperty(UpsertSQL.TARGET_TABLE_NAME_PROPERTY, "test_table");
 
         runner.enqueue(encodeAsAvro(createRecord(1L, "a"), createRecord(2L, "b")));
         runner.run();
@@ -183,7 +183,7 @@ public class UpsertSQLIT {
         TestRunner runner = createRunnerWithControllers();
         runner.setProperty(UpsertSQL.SOURCE_RECORD_READER, SOURCE_READER);
         runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
-        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.setProperty(UpsertSQL.TARGET_TABLE_NAME_PROPERTY, "test_table");
         runner.setProperty(UpsertSQL.MATCH_STRATEGY_PROPERTY, MatchStrategy.insert_only.name());
 
         runner.enqueue(encodeAsAvro(createRecord(1L, "a"), createRecord(2L, "b")));
@@ -211,7 +211,7 @@ public class UpsertSQLIT {
         TestRunner runner = createRunnerWithControllers();
         runner.setProperty(UpsertSQL.SOURCE_RECORD_READER, SOURCE_READER);
         runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
-        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.setProperty(UpsertSQL.TARGET_TABLE_NAME_PROPERTY, "test_table");
         runner.setProperty(UpsertSQL.MATCH_STRATEGY_PROPERTY, MatchStrategy.key_columns.name());
         runner.setProperty(UpsertSQL.KEY_COLUMNS_PROPERTY, "name");
 
