@@ -1,0 +1,15 @@
+{
+  "namespace": "example.avro",
+  "type": "record",
+  "name": "TestTable",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    }
+  ]
+}
