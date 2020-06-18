@@ -176,6 +176,34 @@ public class UpsertSQLIT {
     }
 
     @Test
+    @DisplayName("Insert only")
+    public void testInsertOnly() throws InitializationException, IOException {
+        TestRunner runner = createRunnerWithControllers();
+        runner.setProperty(UpsertSQL.SOURCE_RECORD_READER, SOURCE_READER);
+        runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
+        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.setProperty(UpsertSQL.MATCH_STRATEGY_PROPERTY, MatchStrategy.insert_only.name());
+
+        runner.enqueue(encodeAsAvro(createRecord(1L, "a"), createRecord(2L, "b")));
+        runner.run();
+        runner.assertTransferCount(UpsertSQL.SUCCESS_RELATIONSHIP, 1);
+        runner.assertTransferCount(UpsertSQL.FAILURE_RELATIONSHIP, 0);
+        assertDbData().expectHeight(2)
+                .expectRow(0, 1L, "a")
+                .expectRow(1, 2L, "b");
+
+        runner.enqueue(encodeAsAvro(createRecord(3L, "a"), createRecord(4L, "c")));
+        runner.run();
+        runner.assertTransferCount(UpsertSQL.SUCCESS_RELATIONSHIP, 2);
+        runner.assertTransferCount(UpsertSQL.FAILURE_RELATIONSHIP, 0);
+        assertDbData().expectHeight(4)
+                .expectRow(0, 1L, "a")
+                .expectRow(1, 2L, "b")
+                .expectRow(2, 3L, "a")
+                .expectRow(3, 4L, "c");
+    }
+
+    @Test
     @DisplayName("Upsert matching by columns")
     public void testByColumns() throws InitializationException, IOException {
         TestRunner runner = createRunnerWithControllers();
