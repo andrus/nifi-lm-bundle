@@ -20,7 +20,7 @@ import java.util.List;
 public class ConvertableRecordField {
 
     private RecordField field;
-    private RecordFieldConverter<?> converter;
+    private RecordFieldConverter converter;
 
     public static Index createIndex(ConvertableRecordField[] fields) {
         String[] labels = new String[fields.length];
@@ -73,7 +73,7 @@ public class ConvertableRecordField {
         }
     }
 
-    public ConvertableRecordField(RecordField field, RecordFieldConverter<?> converter) {
+    public ConvertableRecordField(RecordField field, RecordFieldConverter converter) {
         this.field = field;
         this.converter = converter;
     }
