@@ -117,8 +117,8 @@ public class UpsertSQLIT {
     }
 
     @Test
-    @DisplayName("Configuration properties")
-    public void testConfig() throws InitializationException {
+    @DisplayName("Minimal configuration")
+    public void testMinConfig() throws InitializationException {
 
         TestRunner runner = createRunnerWithControllers();
 
@@ -129,6 +129,23 @@ public class UpsertSQLIT {
         runner.assertNotValid();
 
         runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.assertValid();
+    }
+
+    @Test
+    @DisplayName("By columns configuration")
+    public void testByColumnsConfig() throws InitializationException {
+
+        TestRunner runner = createRunnerWithControllers();
+
+        runner.setProperty(UpsertSQL.SOURCE_RECORD_READER, SOURCE_READER);
+        runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
+        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+
+        runner.setProperty(UpsertSQL.MATCH_STRATEGY_PROPERTY, MatchStrategy.key_columns.name());
+        runner.assertNotValid();
+
+        runner.setProperty(UpsertSQL.KEY_COLUMNS_PROPERTY, "name,id");
         runner.assertValid();
     }
 
@@ -156,6 +173,34 @@ public class UpsertSQLIT {
                 .expectRow(0, 1L, "a")
                 .expectRow(1, 2L, "c")
                 .expectRow(2, 3L, "d");
+    }
+
+    @Test
+    @DisplayName("Upsert matching by columns")
+    public void testByColumns() throws InitializationException, IOException {
+        TestRunner runner = createRunnerWithControllers();
+        runner.setProperty(UpsertSQL.SOURCE_RECORD_READER, SOURCE_READER);
+        runner.setProperty(UpsertSQL.TARGET_CONNECTION_POOL_PROPERTY, TARGET_POOL);
+        runner.setProperty(UpsertSQL.TABLE_TABLE_NAME_PROPERTY, "test_table");
+        runner.setProperty(UpsertSQL.MATCH_STRATEGY_PROPERTY, MatchStrategy.key_columns.name());
+        runner.setProperty(UpsertSQL.KEY_COLUMNS_PROPERTY, "name");
+
+        runner.enqueue(encodeAsAvro(createRecord(1L, "a"), createRecord(2L, "b")));
+        runner.run();
+        runner.assertTransferCount(UpsertSQL.SUCCESS_RELATIONSHIP, 1);
+        runner.assertTransferCount(UpsertSQL.FAILURE_RELATIONSHIP, 0);
+        assertDbData().expectHeight(2)
+                .expectRow(0, 1L, "a")
+                .expectRow(1, 2L, "b");
+
+        runner.enqueue(encodeAsAvro(createRecord(3L, "a"), createRecord(4L, "c")));
+        runner.run();
+        runner.assertTransferCount(UpsertSQL.SUCCESS_RELATIONSHIP, 2);
+        runner.assertTransferCount(UpsertSQL.FAILURE_RELATIONSHIP, 0);
+        assertDbData().expectHeight(3)
+                .expectRow(0, 2L, "b")
+                .expectRow(1, 3L, "a")
+                .expectRow(2, 4L, "c");
     }
 
     private static class DBCPServiceImpl extends AbstractControllerService implements DBCPService {

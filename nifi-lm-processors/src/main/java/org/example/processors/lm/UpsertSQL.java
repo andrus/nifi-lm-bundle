@@ -16,29 +16,21 @@
  */
 package org.example.processors.lm;
 
-import com.nhl.dflib.DataFrame;
-import com.nhl.dflib.Printers;
-import com.nhl.dflib.jdbc.Jdbc;
 import org.apache.nifi.annotation.behavior.*;
-import org.apache.nifi.components.PropertyDescriptor;
-import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
 import org.apache.nifi.annotation.documentation.Tags;
+import org.apache.nifi.components.PropertyDescriptor;
+import org.apache.nifi.components.ValidationContext;
+import org.apache.nifi.components.ValidationResult;
+import org.apache.nifi.components.Validator;
+import org.apache.nifi.dbcp.DBCPService;
 import org.apache.nifi.flowfile.FlowFile;
+import org.apache.nifi.processor.*;
 import org.apache.nifi.processor.exception.ProcessException;
-import org.apache.nifi.processor.AbstractProcessor;
-import org.apache.nifi.processor.ProcessContext;
-import org.apache.nifi.processor.ProcessSession;
-import org.apache.nifi.processor.ProcessorInitializationContext;
-import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.processor.util.StandardValidators;
-import org.apache.nifi.serialization.MalformedRecordException;
-import org.apache.nifi.serialization.RecordReaderFactory;
 import org.apache.nifi.serialization.RecordReader;
-import org.apache.nifi.serialization.record.Record;
+import org.apache.nifi.serialization.RecordReaderFactory;
 
-import javax.sql.DataSource;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -82,6 +74,7 @@ public class UpsertSQL extends AbstractProcessor {
             .required(false)
             .allowableValues(MatchStrategy.values())
             .defaultValue(MatchStrategy.pk.name())
+            .addValidator(UpsertSQL::customValidateMatchStrategy)
             .build();
 
     static final PropertyDescriptor KEY_COLUMNS_PROPERTY = new PropertyDescriptor.Builder()
@@ -90,6 +83,7 @@ public class UpsertSQL extends AbstractProcessor {
             .description("A comma-separated list of the column names in the target table to use for row matching. " +
                     "Ignored unless 'Row matching strategy' is 'key_columns'")
             .required(false)
+            .addValidator(StandardValidators.NON_BLANK_VALIDATOR)
             .build();
 
     static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder()
@@ -105,6 +99,16 @@ public class UpsertSQL extends AbstractProcessor {
 
     private List<PropertyDescriptor> descriptors;
     private Set<Relationship> relationships;
+
+
+    static ValidationResult customValidateMatchStrategy(String subject, String input, ValidationContext context) {
+        if (MatchStrategy.key_columns.name().equals(input)) {
+            String keyColumns = context.getProperties().get(KEY_COLUMNS_PROPERTY);
+            return StandardValidators.NON_BLANK_VALIDATOR.validate(subject, keyColumns, context);
+        } else {
+            return Validator.VALID.validate(subject, input, context);
+        }
+    }
 
     @Override
     protected void init(ProcessorInitializationContext context) {
